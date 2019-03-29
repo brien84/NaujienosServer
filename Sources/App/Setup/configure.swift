@@ -11,17 +11,19 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try routes(router)
     services.register(router, as: Router.self)
 
+    let directoryConfig = DirectoryConfig.detect()
+    services.register(directoryConfig)
+    
     // Configure a SQLite database
-    let sqlite = try SQLiteDatabase(storage: .memory)
+    let database = try SQLiteDatabase(storage: .file(path: "\(directoryConfig.workDir)articles.db"))
 
     // Register the configured SQLite database to the database config.
     var databases = DatabasesConfig()
-    databases.add(database: sqlite, as: .sqlite)
+    databases.add(database: database, as: .sqlite)
     services.register(databases)
 
     // Configure migrations
     var migrations = MigrationConfig()
-    //migrations.add(model: Todo.self, database: .sqlite)
+    //migrationConfig.add(model: Article.self, database: .sqlite)
     services.register(migrations)
 }
-
