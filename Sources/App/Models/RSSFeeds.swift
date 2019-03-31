@@ -5,7 +5,6 @@
 //  Created by Marius on 29/03/2019.
 //
 
-import Foundation
 import Vapor
 
 struct RSSFeed {
@@ -16,7 +15,7 @@ struct RSSFeed {
 
 struct RSSFeeds {
 
-    var feeds = [RSSFeed]()
+    var allFeeds = [RSSFeed]()
     
     init() {
         guard let url = Constants.URLs.rssFeed else { return }
@@ -31,7 +30,7 @@ struct RSSFeeds {
     }
     
     init(feeds: [RSSFeed]) {
-        self.feeds = feeds
+        self.allFeeds = feeds
     }
 }
 

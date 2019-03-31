@@ -4,33 +4,35 @@
 <dict>
 	<key>15min</key>
 	<dict>
-        <key>_main</key>
-        <string>https://www.15min.lt/rss/</string>
-        <key>business</key>
-        <string>https://www.15min.lt/verslas/rss</string>
-        <key>sport</key>
-        <string>https://www.15min.lt/sportas/rss</string>
-        <key>science</key>
-        <string>https://www.15min.lt/mokslasit/rss</string>
-        <key>lifestyle</key>
-        <string>https://www.15min.lt/gyvenimas/rss</string>
-        <key>auto</key>
-        <string>https://www.15min.lt/gazas/rss</string>
+		<key>aaaaa</key>
+		<string>asdasdasda</string>
+		<key>_main</key>
+		<string>https://www.15min.lt/rss/</string>
+		<key>business</key>
+		<string>https://www.15min.lt/verslas/rss</string>
+		<key>sport</key>
+		<string>https://www.15min.lt/sportas/rss</string>
+		<key>science</key>
+		<string>https://www.15min.lt/mokslasit/rss</string>
+		<key>lifestyle</key>
+		<string>https://www.15min.lt/gyvenimas/rss</string>
+		<key>auto</key>
+		<string>https://www.15min.lt/gazas/rss</string>
 	</dict>
 	<key>delfi</key>
 	<dict>
-        <key>_main</key>
-        <string>https://www.delfi.lt/rss/feeds/daily.xml</string>
-        <key>business</key>
-        <string>https://www.delfi.lt/verslas/rss/feeds/verslas.xml</string>
-        <key>science</key>
-        <string>https://www.delfi.lt/mokslas/rss/feeds/mokslas.xml</string>
-        <key>health</key>
-        <string>https://www.delfi.lt/sveikata/rss/feeds/sveikatos-naujienos.xml</string>
-        <key>crime</key>
-        <string>https://www.delfi.lt/rss/feeds/crime.xml</string>
-        <key>auto</key>
-        <string>https://www.delfi.lt/auto/rss/feeds/autonaujienos.xml</string>
+		<key>_main</key>
+		<string>https://www.delfi.lt/rss/feeds/daily.xml</string>
+		<key>business</key>
+		<string>https://www.delfi.lt/verslas/rss/feeds/verslas.xml</string>
+		<key>science</key>
+		<string>https://www.delfi.lt/mokslas/rss/feeds/mokslas.xml</string>
+		<key>health</key>
+		<string>https://www.delfi.lt/sveikata/rss/feeds/sveikatos-naujienos.xml</string>
+		<key>crime</key>
+		<string>https://www.delfi.lt/rss/feeds/crime.xml</string>
+		<key>auto</key>
+		<string>https://www.delfi.lt/auto/rss/feeds/autonaujienos.xml</string>
 	</dict>
 </dict>
 </plist>
