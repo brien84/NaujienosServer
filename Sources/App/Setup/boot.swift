@@ -6,10 +6,23 @@ public func boot(_ app: Application) throws {
     let feeds = RSSFeeds()
 
     let urlFetcher = ArticleURLFetcher(on: app)
+    let articleFetcher = try ArticleFetcher(on: app)
     
     urlFetcher.fetch(from: feeds.allFeeds).whenSuccess { articleURLs in
         
-        print(articleURLs.count)
+        articleFetcher.createArticles(from: articleURLs).whenSuccess { articles in
+            
+            let filtered = articles.compactMap { $0 }
+            
+            articleFetcher.saveArticlesToDatabase(articles: filtered).whenComplete {
+                print("GOOSH")
+                articleFetcher.deleteOldArticles().whenComplete {
+                    print("DONE")
+                }
+                
+            }
+            
+        }
         
     }
 }
