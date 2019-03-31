@@ -17,9 +17,11 @@ struct ArticleURL {
 final class ArticleURLFetcher {
     
     let app: Application
+    let client: Client
     
-    init(on app: Application) {
+    init(on app: Application) throws {
         self.app = app
+        self.client = try app.make(Client.self)
     }
     
     func fetch(from feeds: [RSSFeed]) -> Future<[ArticleURL]> {
@@ -32,15 +34,12 @@ final class ArticleURLFetcher {
     }
     
     func fetch(from feed: RSSFeed) -> Future<[ArticleURL]?> {
-        do {
-            return try app.client().get(feed.url).map { response in
-                return self.create(from: response, from: feed)
-            }.catchMap { error -> [ArticleURL]? in
-                print("Error fetching \(feed): \(error.localizedDescription)")
-                return nil
-            }
-        } catch {
-            return app.eventLoop.newSucceededFuture(result: [ArticleURL]())
+
+        return client.get(feed.url).map { response in
+            return self.create(from: response, from: feed)
+        }.catchMap { error -> [ArticleURL]? in
+            print("Error fetching \(feed): \(error.localizedDescription)")
+            return nil
         }
     }
     

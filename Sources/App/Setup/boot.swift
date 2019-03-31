@@ -5,7 +5,7 @@ public func boot(_ app: Application) throws {
   
     let feeds = RSSFeeds()
 
-    let urlFetcher = ArticleURLFetcher(on: app)
+    let urlFetcher = try ArticleURLFetcher(on: app)
     let articleFetcher = try ArticleFetcher(on: app)
     
     urlFetcher.fetch(from: feeds.allFeeds).whenSuccess { articleURLs in
