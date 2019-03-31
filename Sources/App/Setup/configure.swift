@@ -11,10 +11,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try routes(router)
     services.register(router, as: Router.self)
 
-    let directoryConfig = DirectoryConfig.detect()
-    services.register(directoryConfig)
-    
     // Configure a SQLite database
+    let directoryConfig = DirectoryConfig.detect()
     let database = try SQLiteDatabase(storage: .file(path: "\(directoryConfig.workDir)articles.db"))
 
     // Register the configured SQLite database to the database config.
