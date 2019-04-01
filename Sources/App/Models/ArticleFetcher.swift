@@ -21,25 +21,21 @@ final class ArticleFetcher {
         self.conn = try app.newConnection(to: .sqlite).wait()
     }
     
-    func deleteOldArticles() -> Future<Void> {
-
-        return queryAll().flatMap { articles in
-            /// TODO: tidy up bellow statement
-            return articles.map { $0.date.olderThanTwoDays() ? $0.delete(on: self.conn) : .done(on: self.conn) }.flatten(on: self.conn)
-        }
-    }
-
-    func queryAll() -> Future<[Article]> {
-
+    func queryDatabaseAll() -> Future<[Article]> {
         return Article.query(on: conn).all()
     }
     
+    func deleteOldArticles() -> Future<Void> {
+        return queryDatabaseAll().flatMap { articles in
+            return articles.map { $0.date.isOlderThanTwoDays() ? $0.delete(on: self.conn) : .done(on: self.conn) }.flatten(on: self.conn)
+        }
+    }
+
     func saveArticlesToDatabase(articles: [Article]) -> Future<Void> {
         return articles.map { $0.save(on: conn) }.flatten(on: conn).transform(to: .done(on: conn))
     }
     
     func createArticles(from urls: [ArticleURL]) -> Future<[Article?]> {
-        
         return urls.map { item in
             client.get(item.url).map { response in
                 
@@ -50,11 +46,9 @@ final class ArticleFetcher {
                 return nil
             }
         }.flatten(on: app)
-        
     }
     
     private func createArticle(from response: Response, from articleURL: ArticleURL) -> Article? {
-        
         guard let responseData = response.http.body.data else { return nil }
         guard let html = String(bytes: responseData, encoding: .utf8) else { return nil }
         
@@ -86,7 +80,7 @@ final class ArticleFetcher {
 }
 
 extension Date {
-    func olderThanTwoDays() -> Bool {
+    func isOlderThanTwoDays() -> Bool {
         let deadline = Date().addingTimeInterval(-172800)
         return self < deadline
     }

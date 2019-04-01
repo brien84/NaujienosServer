@@ -25,7 +25,6 @@ final class ArticleURLFetcher {
     }
     
     func fetch(from feeds: [RSSFeed]) -> Future<[ArticleURL]> {
-        
         return feeds.map { feed in
             fetch(from: feed)
         }.flatten(on: app).map { result in
@@ -34,7 +33,6 @@ final class ArticleURLFetcher {
     }
     
     func fetch(from feed: RSSFeed) -> Future<[ArticleURL]?> {
-
         return client.get(feed.url).map { response in
             return self.create(from: response, from: feed)
         }.catchMap { error -> [ArticleURL]? in

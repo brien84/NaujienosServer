@@ -8,21 +8,38 @@ public func boot(_ app: Application) throws {
     let urlFetcher = try ArticleURLFetcher(on: app)
     let articleFetcher = try ArticleFetcher(on: app)
     
+    
     urlFetcher.fetch(from: feeds.allFeeds).whenSuccess { articleURLs in
         
-        articleFetcher.createArticles(from: articleURLs).whenSuccess { articles in
-            
-            let filtered = articles.compactMap { $0 }
-            
-            articleFetcher.saveArticlesToDatabase(articles: filtered).whenComplete {
-                print("GOOSH")
-                articleFetcher.deleteOldArticles().whenComplete {
-                    print("DONE")
-                }
+        filterArticleURLs(articleURLs: articleURLs).whenSuccess { filteredURLs in
+        
+            articleFetcher.createArticles(from: filteredURLs).whenSuccess { articles in
                 
+                let filtered = articles.compactMap { $0 }
+                
+                articleFetcher.saveArticlesToDatabase(articles: filtered).whenComplete {
+                    print("GOOSH")
+                    articleFetcher.deleteOldArticles().whenComplete {
+                        print("DONE")
+                    }
+                }
+            }
+        }
+    }
+    
+    func filterArticleURLs(articleURLs: [ArticleURL]) -> Future<[ArticleURL]> {
+        return articleFetcher.queryDatabaseAll().map { articles in
+            
+            var itemsToGetArticlesFrom = [ArticleURL]()
+            let urlsInDB = articles.map { $0.url }
+            
+            for url in articleURLs {
+                if !urlsInDB.contains(url.url) {
+                    itemsToGetArticlesFrom.append(url)
+                }
             }
             
+            return itemsToGetArticlesFrom
         }
-        
     }
 }
