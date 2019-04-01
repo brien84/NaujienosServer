@@ -15,10 +15,15 @@ public func boot(_ app: Application) throws {
         
             articleFetcher.createArticles(from: filteredURLs).whenSuccess { articles in
                 
-                let filtered = articles.compactMap { $0 }
+                let filtered = articles.compactMap { article -> Article? in
+                    if let article = article, !article.date.isOlderThanTwoDays() {
+                        return article
+                    }
+                    return nil
+                }
                 
                 articleFetcher.saveArticlesToDatabase(articles: filtered).whenComplete {
-                    print("GOOSH")
+                    
                     articleFetcher.deleteOldArticles().whenComplete {
                         print("DONE")
                     }
