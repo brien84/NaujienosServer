@@ -10,9 +10,9 @@ import Vapor
 struct Constants {
     
     struct URLs {
-        static var rssFeed: URL? {
+        static var rssFeed: URL {
             let directory = DirectoryConfig.detect()
-            return URL(fileURLWithPath: "\(directory.workDir)Sources/App/Models/RSSFeeds.plist")
+            return URL(fileURLWithPath: "\(directory.workDir)Public/RSSFeeds.plist")
         }
     }
     

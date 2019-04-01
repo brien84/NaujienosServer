@@ -13,13 +13,16 @@ struct RSSFeed {
     let url: String
 }
 
+/// Decodes RSSFeeds.plist into array of RSSFeed.
 struct RSSFeeds {
 
-    var allFeeds = [RSSFeed]()
+    var all = [RSSFeed]()
     
     init() {
-        guard let url = Constants.URLs.rssFeed else { return }
-        guard let data = try? Data(contentsOf: url) else { return }
+        guard let data = try? Data(contentsOf: Constants.URLs.rssFeed) else {
+            print("Could not find RSSFeeds.plist. Check URL in Constants!")
+            return
+        }
 
         let decoder = PropertyListDecoder()
         do {
@@ -29,14 +32,14 @@ struct RSSFeeds {
         }
     }
     
-    init(feeds: [RSSFeed]) {
-        self.allFeeds = feeds
+    private init(feeds: [RSSFeed]) {
+        self.all = feeds
     }
 }
 
 extension RSSFeeds: Decodable {
     
-    struct ProviderKey: CodingKey {
+    private struct ProviderKey: CodingKey {
         var stringValue: String
         init?(stringValue: String) {
             self.stringValue = stringValue
@@ -46,7 +49,7 @@ extension RSSFeeds: Decodable {
         init?(intValue: Int) { return nil }
     }
     
-    struct CategoryKey: CodingKey {
+    private struct CategoryKey: CodingKey {
         var stringValue: String
         init?(stringValue: String) {
             self.stringValue = stringValue
@@ -56,11 +59,11 @@ extension RSSFeeds: Decodable {
         init?(intValue: Int) { return nil }
     }
     
-    public init(from decoder: Decoder) throws {
+    /// The initializer loops over all of the keys of the first (provider) and second (categories) levels of nesting.
+    init(from decoder: Decoder) throws {
         var feeds = [RSSFeed]()
         
         let providers = try decoder.container(keyedBy: ProviderKey.self)
-        
         for providerKey in providers.allKeys {
             
             let categories = try providers.nestedContainer(keyedBy: CategoryKey.self, forKey: providerKey)

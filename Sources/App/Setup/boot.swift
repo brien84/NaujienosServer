@@ -4,6 +4,6 @@ import Vapor
 public func boot(_ app: Application) throws {
     
     let coordinator = try Coordinator(on: app)
-    //coordinator.start()
+    coordinator.start()
   
 }

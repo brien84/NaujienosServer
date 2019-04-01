@@ -23,7 +23,7 @@ final class Coordinator {
         
         let feeds = RSSFeeds()
         
-        urlFetcher.fetch(from: feeds.allFeeds).whenSuccess { articleURLs in
+        urlFetcher.fetch(from: feeds.all).whenSuccess { articleURLs in
             
             self.filterArticleURLs(articleURLs: articleURLs).whenSuccess { filteredURLs in
                 
