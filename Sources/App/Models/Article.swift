@@ -5,6 +5,7 @@
 //  Created by Marius on 31/03/2019.
 //
 
+import Vapor
 import FluentSQLite
 import Validation
 
@@ -23,6 +24,8 @@ struct Article {
 extension Article: SQLiteModel { }
 
 extension Article: Migration { }
+
+extension Article: Content { }
 
 extension Article: Validatable {
     static func validations() throws -> Validations<Article> {
