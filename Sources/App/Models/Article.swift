@@ -10,7 +10,6 @@ import FluentSQLite
 import Validation
 
 struct Article {
-    
     var id: Int?
     var url: String
     var title: String
