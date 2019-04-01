@@ -4,8 +4,6 @@
 <dict>
 	<key>15min</key>
 	<dict>
-		<key>aaaaa</key>
-		<string>asdasdasda</string>
 		<key>_main</key>
 		<string>https://www.15min.lt/rss/</string>
 		<key>business</key>
