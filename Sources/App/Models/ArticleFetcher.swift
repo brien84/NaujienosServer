@@ -21,13 +21,16 @@ final class ArticleFetcher {
         self.conn = try app.newConnection(to: .sqlite).wait()
     }
     
-    func queryDatabaseAll() -> Future<[Article]> {
+    func queryDatabaseForAll() -> Future<[Article]> {
         return Article.query(on: conn).all()
     }
     
+    /// Deletes articles older than two days from database.
     func deleteOldArticles() -> Future<Void> {
-        return queryDatabaseAll().flatMap { articles in
-            return articles.map { $0.date.isOlderThanTwoDays() ? $0.delete(on: self.conn) : .done(on: self.conn) }.flatten(on: self.conn)
+        return queryDatabaseForAll().flatMap { articles in
+            return articles.map {
+                $0.date.isOlderThanTwoDays() ? $0.delete(on: self.conn) : .done(on: self.conn)
+            }.flatten(on: self.conn)
         }
     }
 
@@ -35,12 +38,11 @@ final class ArticleFetcher {
         return articles.map { $0.save(on: conn) }.flatten(on: conn).transform(to: .done(on: conn))
     }
     
-    func createArticles(from urls: [ArticleURL]) -> Future<[Article?]> {
+    func fetchArticles(from urls: [ArticleURL]) -> Future<[Article?]> {
         return urls.map { item in
             client.get(item.url).map { response in
                 
                 return self.createArticle(from: response, from: item)
-                
             }.catchMap { error -> (Article?) in
                 print("Error fetching \(item): \(error)")
                 return nil
@@ -57,6 +59,7 @@ final class ArticleFetcher {
             let title = try doc.select("[itemprop='headline']").text()
             let description = try doc.select("[itemprop='description']").text()
             let imageURL = try doc.select("[itemprop='image']").attr("src")
+            /// If could not convert html string to date, aborts article creation.
             let optionalDate = try doc.select("[itemprop='datePublished']").attr("content").convertToDate()
             guard let date = optionalDate else { return nil }
             
@@ -70,8 +73,8 @@ final class ArticleFetcher {
                                      category: articleURL.category)
             
             try newArticle.validate()
-            
             return newArticle
+            
         } catch {
             print("Error creating Article: \(error)")
             return nil
@@ -82,7 +85,7 @@ final class ArticleFetcher {
 extension Date {
     func isOlderThanTwoDays() -> Bool {
         let deadline = Date().addingTimeInterval(-172800)
-        return self < deadline
+        return deadline > self
     }
 }
 

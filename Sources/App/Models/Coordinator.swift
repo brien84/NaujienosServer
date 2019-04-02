@@ -20,47 +20,40 @@ final class Coordinator {
     }
     
     func start() {
+        app.eventLoop.scheduleTask(in: TimeAmount.seconds(120), start)
+        update()
+    }
+    
+    private func update() {
+        print("Starting update!")
         
         let feeds = RSSFeeds()
         
-        urlFetcher.fetch(from: feeds.all).whenSuccess { articleURLs in
-            
-            self.filterArticleURLs(articleURLs: articleURLs).whenSuccess { filteredURLs in
-                
-                self.articleFetcher.createArticles(from: filteredURLs).whenSuccess { articles in
-                    
-                    let filtered = articles.compactMap { article -> Article? in
-                        if let article = article, !article.date.isOlderThanTwoDays() {
-                            return article
-                        }
-                        return nil
-                    }
-                    
-                    self.articleFetcher.saveArticlesToDatabase(articles: filtered).whenComplete {
-                        
-                        self.articleFetcher.deleteOldArticles().whenComplete {
-                            print("DONE")
-                        }
-                    }
-                }
-            }
+        urlFetcher.fetch(from: feeds.all).then { articleURLs in
+            self.filter(articleURLs: articleURLs)
+        }.then { filteredArticleURLs in
+            self.articleFetcher.fetchArticles(from: filteredArticleURLs)
+        }.map { articles in
+            self.filter(articles: articles)
+        }.then { filteredArticles in
+            self.articleFetcher.saveArticlesToDatabase(articles: filteredArticles)
+        }.then {
+            self.articleFetcher.deleteOldArticles()
+        }.whenComplete {
+            print("Done!")
         }
-        
     }
     
-    private func filterArticleURLs(articleURLs: [ArticleURL]) -> Future<[ArticleURL]> {
-        return articleFetcher.queryDatabaseAll().map { articles in
-            
-            var itemsToGetArticlesFrom = [ArticleURL]()
+    private func filter(articles: [Article?]) -> [Article] {
+        return articles.compactMap { $0 }.filter { !$0.date.isOlderThanTwoDays() }
+    }
+    
+    private func filter(articleURLs: [ArticleURL]) -> Future<[ArticleURL]> {
+        return articleFetcher.queryDatabaseForAll().map { articles in
+
             let urlsInDB = articles.map { $0.url }
             
-            for url in articleURLs {
-                if !urlsInDB.contains(url.url) {
-                    itemsToGetArticlesFrom.append(url)
-                }
-            }
-            
-            return itemsToGetArticlesFrom
+            return articleURLs.filter { !urlsInDB.contains($0.url) }
         }
     }
 }

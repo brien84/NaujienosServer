@@ -1,6 +1,5 @@
 import Routing
 import Vapor
-import Fluent
 import FluentSQLite
 
 struct Filter: Content {
