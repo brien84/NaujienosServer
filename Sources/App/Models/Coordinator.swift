@@ -20,15 +20,16 @@ final class Coordinator {
     }
     
     func start() {
-        app.eventLoop.scheduleTask(in: TimeAmount.seconds(120), start)
+        //app.eventLoop.scheduleTask(in: TimeAmount.seconds(120), start)
+        
         update()
     }
     
     private func update() {
         print("Starting update!")
-        
+
         let feeds = RSSFeeds()
-        
+
         urlFetcher.fetch(from: feeds.all).then { articleURLs in
             self.filter(articleURLs: articleURLs)
         }.then { filteredArticleURLs in

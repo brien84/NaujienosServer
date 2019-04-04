@@ -40,8 +40,8 @@ final class ArticleFetcher {
     
     func fetchArticles(from urls: [ArticleURL]) -> Future<[Article?]> {
         return urls.map { item in
-            client.get(item.url).map { response in
-                
+            client.get(item.url).map { [unowned self] response in
+
                 return self.createArticle(from: response, from: item)
             }.catchMap { error -> (Article?) in
                 print("Error fetching \(item): \(error)")
@@ -52,8 +52,10 @@ final class ArticleFetcher {
     
     private func createArticle(from response: Response, from articleURL: ArticleURL) -> Article? {
         guard let responseData = response.http.body.data else { return nil }
-        guard let html = String(bytes: responseData, encoding: .utf8) else { return nil }
-        
+        guard var html = String(bytes: responseData, encoding: .utf8) else { return nil }
+
+        html = html.shortHTML(from: articleURL)
+
         do {
             let doc: Document = try SwiftSoup.parse(html)
             let title = try doc.select("[itemprop='headline']").text()
@@ -62,7 +64,7 @@ final class ArticleFetcher {
             /// If could not convert html string to date, aborts article creation.
             let optionalDate = try doc.select("[itemprop='datePublished']").attr("content").convertToDate()
             guard let date = optionalDate else { return nil }
-            
+  
             let newArticle = Article(id: nil,
                                      url: articleURL.url,
                                      title: title,
@@ -76,7 +78,7 @@ final class ArticleFetcher {
             return newArticle
             
         } catch {
-            print("Error creating Article: \(error)")
+            print("Error creating \(articleURL.url): \(error)")
             return nil
         }
     }
@@ -86,6 +88,27 @@ extension Date {
     func isOlderThanTwoDays() -> Bool {
         let deadline = Date().addingTimeInterval(-172800)
         return deadline > self
+    }
+}
+
+extension String {
+    func shortHTML(from articleURL: ArticleURL) -> String {
+        let regex: String
+        switch articleURL.provider {
+        ///<meta itemprop="datePublished"(?s).*itemprop="image"\/>
+        case "delfi": regex = "<meta itemprop=\"datePublished\"(?s).*itemprop=\"image\" \\/>"
+        ///<meta itemprop="datePublished"(?s).*<h4 class="intro" itemprop="description">(?s).*?<div class="clear"><\/div>
+        case "15min": regex = "<meta itemprop=\"datePublished\"(?s).*<h4 class=\"intro\" itemprop=\"description\">(?s).*?<div class=\"clear\"><\\/div>"
+        default: regex = ""
+        }
+        let range = self.range(of: regex, options: .regularExpression)
+        if let range = range {
+            return String(self[range])
+        } else {
+            print(articleURL.url)
+            return ""
+        }
+        
     }
 }
 
