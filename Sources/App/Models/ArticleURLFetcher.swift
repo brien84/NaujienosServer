@@ -8,12 +8,6 @@
 import Vapor
 import SwiftSoup
 
-struct ArticleURL {
-    var provider: String
-    var category: String
-    var url: String
-}
-
 final class ArticleURLFetcher {
     
     let app: Application
