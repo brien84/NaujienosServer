@@ -20,8 +20,7 @@ final class Coordinator {
     }
     
     func start() {
-        //app.eventLoop.scheduleTask(in: TimeAmount.seconds(120), start)
-        
+        app.eventLoop.scheduleTask(in: TimeAmount.seconds(300), start)
         update()
     }
     
@@ -33,24 +32,24 @@ final class Coordinator {
         urlFetcher.fetch(from: feeds.all).then { articleURLs in
             self.filter(articleURLs: articleURLs)
         }.then { filteredArticleURLs in
-            self.articleFetcher.fetchArticles(from: filteredArticleURLs)
+            self.articleFetcher.fetch(filteredArticleURLs)
         }.map { articles in
             self.filter(articles: articles)
         }.then { filteredArticles in
-            self.articleFetcher.saveArticlesToDatabase(articles: filteredArticles)
+            self.articleFetcher.saveToDatabase(filteredArticles)
         }.then {
-            self.articleFetcher.deleteOldArticles()
+            self.articleFetcher.deleteExpired()
         }.whenComplete {
             print("Done!")
         }
     }
     
     private func filter(articles: [Article?]) -> [Article] {
-        return articles.compactMap { $0 }.filter { !$0.date.isOlderThanTwoDays() }
+        return articles.compactMap { $0 }.filter { !$0.date.isExpired }
     }
     
     private func filter(articleURLs: [ArticleURL]) -> Future<[ArticleURL]> {
-        return articleFetcher.queryDatabaseForAll().map { articles in
+        return articleFetcher.returnAll().map { articles in
 
             let urlsInDB = articles.map { $0.url }
             

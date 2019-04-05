@@ -21,28 +21,28 @@ final class ArticleFetcher {
         self.conn = try app.newConnection(to: .sqlite).wait()
     }
     
-    func queryDatabaseForAll() -> Future<[Article]> {
+    func returnAll() -> Future<[Article]> {
         return Article.query(on: conn).all()
     }
     
-    /// Deletes articles older than two days from database.
-    func deleteOldArticles() -> Future<Void> {
-        return queryDatabaseForAll().flatMap { articles in
+    /// Deletes expired articles from database.
+    func deleteExpired() -> Future<Void> {
+        return returnAll().flatMap { articles in
             return articles.map {
-                $0.date.isOlderThanTwoDays() ? $0.delete(on: self.conn) : .done(on: self.conn)
+                $0.date.isExpired ? $0.delete(on: self.conn) : .done(on: self.conn)
             }.flatten(on: self.conn)
         }
     }
 
-    func saveArticlesToDatabase(articles: [Article]) -> Future<Void> {
+    func saveToDatabase(_ articles: [Article]) -> Future<Void> {
         return articles.map { $0.save(on: conn) }.flatten(on: conn).transform(to: .done(on: conn))
     }
     
-    func fetchArticles(from urls: [ArticleURL]) -> Future<[Article?]> {
+    func fetch(_ urls: [ArticleURL]) -> Future<[Article?]> {
         return urls.map { item in
-            client.get(item.url).map { [unowned self] response in
+            client.get(item.url).map { response in
 
-                return self.createArticle(from: response, from: item)
+                return self.create(from: response, from: item)
             }.catchMap { error -> (Article?) in
                 print("Error fetching \(item): \(error)")
                 return nil
@@ -50,11 +50,11 @@ final class ArticleFetcher {
         }.flatten(on: app)
     }
     
-    private func createArticle(from response: Response, from articleURL: ArticleURL) -> Article? {
+    private func create(from response: Response, from articleURL: ArticleURL) -> Article? {
         guard let responseData = response.http.body.data else { return nil }
         guard var html = String(bytes: responseData, encoding: .utf8) else { return nil }
 
-        html = html.shortHTML(from: articleURL)
+        html = html.shortenHTML(of: articleURL)
 
         do {
             let doc: Document = try SwiftSoup.parse(html)
@@ -85,22 +85,28 @@ final class ArticleFetcher {
 }
 
 extension Date {
-    func isOlderThanTwoDays() -> Bool {
+    /// Returns true if article's creation date is older than two days.
+    var isExpired: Bool {
         let deadline = Date().addingTimeInterval(-172800)
         return deadline > self
     }
 }
 
 extension String {
-    func shortHTML(from articleURL: ArticleURL) -> String {
+    /// Using regex, searches for a substring, which contains tags needed for article creation.
+    /// If not found, returns an empty string.
+    /// Shortening HTML string significantly improves SwiftSoup parsing speed.
+    func shortenHTML(of articleURL: ArticleURL) -> String {
+        
         let regex: String
         switch articleURL.provider {
-        ///<meta itemprop="datePublished"(?s).*itemprop="image"\/>
+        /// <meta itemprop="datePublished"(?s).*itemprop="image"\/>
         case "delfi": regex = "<meta itemprop=\"datePublished\"(?s).*itemprop=\"image\" \\/>"
-        ///<meta itemprop="datePublished"(?s).*<h4 class="intro" itemprop="description">(?s).*?<div class="clear"><\/div>
+        /// <meta itemprop="datePublished"(?s).*<h4 class="intro" itemprop="description">(?s).*?<div class="clear"><\/div>
         case "15min": regex = "<meta itemprop=\"datePublished\"(?s).*<h4 class=\"intro\" itemprop=\"description\">(?s).*?<div class=\"clear\"><\\/div>"
         default: regex = ""
         }
+        
         let range = self.range(of: regex, options: .regularExpression)
         if let range = range {
             return String(self[range])
@@ -108,7 +114,6 @@ extension String {
             print(articleURL.url)
             return ""
         }
-        
     }
 }
 

@@ -61,7 +61,7 @@ final class ArticleURLFetcher {
 }
 
 extension String {
-    /// Fixes RSS provider's human error in URL.
+    /// Fixes RSS provider's possible human error in URL.
     func cleanURL() -> String {
         return self.replacingOccurrences(of: "www.delfi.lthttps://", with: "")
     }
