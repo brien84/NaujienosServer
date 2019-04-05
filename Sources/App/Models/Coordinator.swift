@@ -20,7 +20,7 @@ final class Coordinator {
     }
     
     func start() {
-        app.eventLoop.scheduleTask(in: TimeAmount.seconds(300), start)
+        app.eventLoop.scheduleTask(in: TimeAmount.seconds(Constants.Time.updateTime), start)
         update()
     }
     

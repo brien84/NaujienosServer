@@ -85,9 +85,9 @@ final class ArticleFetcher {
 }
 
 extension Date {
-    /// Returns true if article's creation date is older than two days.
+    /// Returns true if article's publish date is older than deadline.
     var isExpired: Bool {
-        let deadline = Date().addingTimeInterval(-172800)
+        let deadline = Date().addingTimeInterval(Constants.Time.expirationDeadline)
         return deadline > self
     }
 }
