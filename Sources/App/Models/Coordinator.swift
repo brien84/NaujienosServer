@@ -7,6 +7,7 @@
 
 import Vapor
 
+/// Runs scheduled database updates, started on boot.
 final class Coordinator {
     
     let app: Application
@@ -44,15 +45,16 @@ final class Coordinator {
         }
     }
     
+    /// Removes nil values and Articles which are already expired.
     private func filter(articles: [Article?]) -> [Article] {
         return articles.compactMap { $0 }.filter { !$0.date.isExpired }
     }
     
+    /// Removes ArticleURL, if corresponding Article already exists in database.
     private func filter(articleURLs: [ArticleURL]) -> Future<[ArticleURL]> {
         return articleFetcher.returnAll().map { articles in
 
             let urlsInDB = articles.map { $0.url }
-            
             return articleURLs.filter { !urlsInDB.contains($0.url) }
         }
     }

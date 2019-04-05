@@ -25,7 +25,7 @@ final class ArticleFetcher {
         return Article.query(on: conn).all()
     }
     
-    /// Deletes expired articles from database.
+    /// Deletes expired Articles from database.
     func deleteExpired() -> Future<Void> {
         return returnAll().flatMap { articles in
             return articles.map {
@@ -85,7 +85,7 @@ final class ArticleFetcher {
 }
 
 extension Date {
-    /// Returns true if article's publish date is older than deadline.
+    /// Returns true if Article's publish date is older than deadline.
     var isExpired: Bool {
         let deadline = Date().addingTimeInterval(Constants.Time.expirationDeadline)
         return deadline > self
@@ -93,7 +93,7 @@ extension Date {
 }
 
 extension String {
-    /// Using regex, searches for a substring, which contains tags needed for article creation.
+    /// Using regex, searches for a substring, which contains tags needed for Article creation.
     /// If not found, returns an empty string.
     /// Shortening HTML string significantly improves SwiftSoup parsing speed.
     func shortenHTML(of articleURL: ArticleURL) -> String {
