@@ -26,7 +26,7 @@ final class Coordinator {
     }
     
     private func update() {
-        print("Starting update!")
+        print("Starting update.")
 
         let feeds = RSSFeeds()
 
@@ -41,7 +41,7 @@ final class Coordinator {
         }.then {
             self.articleFetcher.deleteExpired()
         }.whenComplete {
-            print("Done!")
+            print("Update completed.")
         }
     }
     

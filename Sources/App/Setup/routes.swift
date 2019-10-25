@@ -12,10 +12,11 @@ struct FilterItem {
     var category: String
 }
 
-/// Register your application's routes here.
 public func routes(_ router: Router) throws {
-
-    router.post([Filter].self, at: "filter") { req, filter -> Future<[Article]> in
+    
+    /// Decodes request to Filter object and converts it to array of FilterItems.
+    /// Then returns Articles from database using query with FilterItems.
+    router.post([Filter].self, at: "articles") { req, filter -> Future<[Article]> in
         
         let filters = convertFilterToItems(with: filter)
         
@@ -26,7 +27,8 @@ public func routes(_ router: Router) throws {
                         andGroup.filter(\.provider == filter.provider).filter(\.category == filter.category)
                     }
                 }
-            }.all() // group by url removes duplicates from categories
+            /// groupBy(\.url) removes possible duplicates, if same Article exists under many categories.
+            }.groupBy(\.url).all()
         } else {
             return req.eventLoop.newSucceededFuture(result: [Article]())
         }
