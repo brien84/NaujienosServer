@@ -33,6 +33,10 @@ public func routes(_ router: Router) throws {
             return req.eventLoop.newSucceededFuture(result: [Article]())
         }
     }
+    
+    router.get("all") { req -> Future<[Article]> in
+        return Article.query(on: req).all()
+    }
 }
 
 private func convertFilterToItems(with filters: [Filter]) -> [FilterItem] {
