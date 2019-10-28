@@ -16,7 +16,7 @@ public func routes(_ router: Router) throws {
     
     /// Decodes request to Filter object and converts it to array of FilterItems.
     /// Then returns Articles from database using query with FilterItems.
-    router.post([Filter].self, at: "articles") { req, filter -> Future<[Article]> in
+    router.post([Filter].self, at: "get") { req, filter -> Future<[Article]> in
         
         let filters = convertFilterToItems(with: filter)
         
